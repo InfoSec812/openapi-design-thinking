@@ -1,0 +1,141 @@
+openapi: 3.0.2
+info:
+  title: todo-demo
+  version: 1.0.0
+tags:
+  - todo
+servers:
+  - url: '{proto}://{domain}:{port}{base_path}'
+    description: 'API URL'
+    variables:
+      proto:
+        enum:
+          - http
+          - https
+        default: http
+      base_path:
+        enum:
+          - /
+          - /api/v1
+        default: /
+      domain:
+        enum:
+          - localhost
+        default: localhost
+      port:
+        enum:
+          - '7080'
+        default: '7080'
+paths:
+  /v1/todo:
+    get:
+      operationId: getTodoList
+      tags:
+        - todo
+      responses:
+        200:
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Todo'
+      parameters:
+        - in: query
+          name: sort
+          required: false
+          schema:
+            type: string
+        - in: query
+          name: filter
+          required: false
+          schema:
+            oneOf:
+              - type: string
+              - type: boolean
+        - in: query
+          name: filterBy
+          required: false
+          schema:
+            type: string
+            enum:
+              - title
+              - description
+              - created
+              - due
+              - completed
+    post:
+      operationId: addTodo
+      tags:
+        - todo
+      responses:
+        201:
+          description: Created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Todo'
+  /v1/todo/{id}:
+    get:
+      operationId: getTodoById
+      tags:
+        - todo
+      responses:
+        200:
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Todo'
+    put:
+      operationId: updateTodoById
+      tags:
+        - todo
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Todo'
+      responses:
+        202:
+          description: Accepted
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Todo'
+    delete:
+      operationId: deleteTodoById
+      tags:
+        - todo
+      responses:
+        204:
+          description: No content
+    parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+          format: uuid
+        required: true
+
+components:
+  schemas:
+    Todo:
+      required:
+        - title
+        - id
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        title:
+          type: string
+          maxLength: 64
+          x-faker: lorem.text
+        completed:
+          type: boolean
+          default: false
+
+
